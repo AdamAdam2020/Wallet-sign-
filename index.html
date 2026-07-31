@@ -27,7 +27,48 @@ Sign Message
 <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
 <script>
+let provider;
+let signer;
 
+document.getElementById("connectButton").onclick = async () => {
+    if (!window.ethereum) {
+        alert("No wallet detected.");
+        return;
+    }
+
+    try {
+        provider = new ethers.providers.Web3Provider(window.ethereum);
+        await provider.send("eth_requestAccounts", []);
+        signer = provider.getSigner();
+
+        const address = await signer.getAddress();
+
+        document.getElementById("result").innerText =
+            "Connected: " + address;
+    } catch (err) {
+        document.getElementById("result").innerText =
+            "Connection failed.";
+    }
+};
+
+document.getElementById("signButton").onclick = async () => {
+    if (!signer) {
+        alert("Connect wallet first.");
+        return;
+    }
+
+    try {
+        const signature = await signer.signMessage(
+            "Hello! This is only a test message."
+        );
+
+        document.getElementById("result").innerText =
+            signature;
+    } catch (err) {
+        document.getElementById("result").innerText =
+            "Signing cancelled.";
+    }
+};
 </script>
 </body>
 </html>
