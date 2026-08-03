@@ -1,118 +1,145 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Wallet Sign Test</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Web3 Wallet Demo</title>
+
+<style>
+body{
+    font-family:Arial,Helvetica,sans-serif;
+    max-width:700px;
+    margin:40px auto;
+    padding:20px;
+    background:#f4f4f4;
+}
+
+.card{
+    background:white;
+    border-radius:10px;
+    padding:25px;
+    box-shadow:0 2px 8px rgba(0,0,0,.1);
+}
+
+button{
+    padding:12px 18px;
+    margin:10px 0;
+    cursor:pointer;
+}
+
+pre{
+    white-space:pre-wrap;
+    word-break:break-word;
+    background:#eee;
+    padding:12px;
+}
+</style>
 </head>
 
 <body>
 
-<<body>
+<div class="card">
 
-<h1>Account Verification</h1>
+<h2>Web3 Wallet Demo</h2>
 
 <p>
-To protect your account and verify wallet ownership,
-please connect your wallet and sign a verification message.
+This page demonstrates how to connect a wallet, read its address and ETH balance,
+and request a demo message signature.
 </p>
 
-<button id="connectButton">
-Connect Wallet
+<button id="connectButton">Connect Wallet</button>
+
+<button id="signButton" disabled>
+Sign Demo Message
 </button>
 
-<br><br>
+<pre id="result"></pre>
 
-<button id="signButton">
-Verify Account
-</button>
-
-<p id="result"></p>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
 <script>
+
 let provider;
 let signer;
 
-document.getElementById("connectButton").onclick = async () => {
-    if (!window.ethereum) {
-        alert("No wallet detected.");
+const result=document.getElementById("result");
+
+document.getElementById("connectButton").onclick=async()=>{
+
+    if(!window.ethereum){
+        alert("No compatible wallet detected.");
         return;
     }
 
-    try {
-        provider = new ethers.providers.Web3Provider(window.ethereum);
-        await provider.send("eth_requestAccounts", []);
-        signer = provider.getSigner();
+    try{
 
-        const address = await signer.getAddress();
+        provider=new ethers.providers.Web3Provider(window.ethereum);
 
-        document.getElementById("result").innerText =
-            "Wallet Connected\n" + address;
+        await provider.send("eth_requestAccounts",[]);
 
-    } catch (err) {
-        document.getElementById("result").innerText =
-            "Connection failed.";
+        signer=provider.getSigner();
+
+        const address=await signer.getAddress();
+
+        const balance=await provider.getBalance(address);
+
+        const eth=ethers.utils.formatEther(balance);
+
+        result.textContent=
+`Wallet Connected
+
+Address:
+${address}
+
+Balance:
+${Number(eth).toFixed(4)} ETH`;
+
+        document.getElementById("signButton").disabled=false;
+
     }
-};
 
-document.getElementById("signButton").onclick = async () => {
+    catch(e){
 
-    if (!signer) {
-        alert("Please connect your wallet first.");
-        return;
-    }
-
-    try {
-
-       const address = await signer.getAddress();
-
-// Get ETH balance
-const balance = await provider.getBalance(address);
-const balanceInEth = parseFloat(
-    ethers.utils.formatEther(balance)
-);
-
-// Display wallet address and balance
-let message =
-    "Wallet Connected\n\n" +
-    "Wallet Address:\n" + address + "\n\n" +
-    "Balance: " + balanceInEth.toFixed(4) + " ETH\n\n";
-
-if (balanceInEth >= 1) {
-    message += "✅ This wallet meets the minimum requirement of 1 ETH.";
-} else {
-    message += "❌ This wallet does not meet the minimum requirement of 1 ETH.";
-}
-
-document.getElementById("result").innerText = message;
-
-Please sign this message to verify ownership of your wallet.
-
-This request will NOT:
-• Send cryptocurrency
-• Create a blockchain transaction
-• Charge any gas fees
-
-Timestamp: ${new Date().toISOString()}`
-        );
-
-        document.getElementById("result").innerText =
-            "Verification Complete";
-
-        console.log(signature);
-
-    } catch (err) {
-
-        document.getElementById("result").innerText =
-            "Verification cancelled.";
+        result.textContent="Connection cancelled.";
 
     }
 
 };
+
+document.getElementById("signButton").onclick=async()=>{
+
+    try{
+
+        const message=
+`Demo Message
+
+This is a demonstration signature.
+
+Signing this message:
+• does NOT send cryptocurrency
+• does NOT create a blockchain transaction
+• does NOT consume gas
+
+Time:
+${new Date().toISOString()}`;
+
+        const signature=await signer.signMessage(message);
+
+        result.textContent+=`\n\nSignature:\n${signature}`;
+
+    }
+
+    catch(e){
+
+        result.textContent+="\n\nSignature request cancelled.";
+
+    }
+
+};
+
 </script>
 
-</body>
-</script>
 </body>
 </html>
