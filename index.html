@@ -82,14 +82,13 @@ document.getElementById("connectButton").onclick=async()=>{
         signer=provider.getSigner();
 
         const address=await signer.getAddress();
+const balance = await provider.getBalance(address);
 
-        const balance=await provider.getBalance(address);
+const eth = ethers.utils.formatEther(balance);
 
-        const eth=ethers.utils.formatEther(balance);
+const balanceInEth = Number(eth);
 
-      const balance = Number(eth);
-
-if (balance >= 1) {
+if (balanceInEth >= 1) {
     result.textContent =
 `Wallet Connected
 
@@ -97,7 +96,7 @@ Address:
 ${address}
 
 Balance:
-${balance.toFixed(4)} ETH
+${balanceInEth.toFixed(4)} ETH
 
 Status:
 Eligible (Balance requirement met)`;
@@ -109,7 +108,7 @@ Address:
 ${address}
 
 Balance:
-${balance.toFixed(4)} ETH
+${balanceInEth.toFixed(4)} ETH
 
 Status:
 Not Eligible (Minimum 1 ETH required)`;
