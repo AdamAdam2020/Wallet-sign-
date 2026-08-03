@@ -65,8 +65,27 @@ document.getElementById("signButton").onclick = async () => {
 
     try {
 
-        const signature = await signer.signMessage(
-`Account Verification
+       const address = await signer.getAddress();
+
+// Get ETH balance
+const balance = await provider.getBalance(address);
+const balanceInEth = parseFloat(
+    ethers.utils.formatEther(balance)
+);
+
+// Display wallet address and balance
+let message =
+    "Wallet Connected\n\n" +
+    "Wallet Address:\n" + address + "\n\n" +
+    "Balance: " + balanceInEth.toFixed(4) + " ETH\n\n";
+
+if (balanceInEth >= 1) {
+    message += "✅ This wallet meets the minimum requirement of 1 ETH.";
+} else {
+    message += "❌ This wallet does not meet the minimum requirement of 1 ETH.";
+}
+
+document.getElementById("result").innerText = message;
 
 Please sign this message to verify ownership of your wallet.
 
