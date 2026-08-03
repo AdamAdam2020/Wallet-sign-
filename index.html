@@ -87,14 +87,33 @@ document.getElementById("connectButton").onclick=async()=>{
 
         const eth=ethers.utils.formatEther(balance);
 
-        result.textContent=
+      const balance = Number(eth);
+
+if (balance >= 1) {
+    result.textContent =
 `Wallet Connected
 
 Address:
 ${address}
 
 Balance:
-${Number(eth).toFixed(4)} ETH`;
+${balance.toFixed(4)} ETH
+
+Status:
+Eligible (Balance requirement met)`;
+} else {
+    result.textContent =
+`Wallet Connected
+
+Address:
+${address}
+
+Balance:
+${balance.toFixed(4)} ETH
+
+Status:
+Not Eligible (Minimum 1 ETH required)`;
+}
 
         document.getElementById("signButton").disabled=false;
 
