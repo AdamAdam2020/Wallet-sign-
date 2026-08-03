@@ -7,10 +7,13 @@
 
 <body>
 
-<h1>Wallet Signature Test</h1>
+<<body>
+
+<h1>Account Verification</h1>
 
 <p>
-This page will let you connect your wallet and sign a message.
+To protect your account and verify wallet ownership,
+please connect your wallet and sign a verification message.
 </p>
 
 <button id="connectButton">
@@ -20,10 +23,11 @@ Connect Wallet
 <br><br>
 
 <button id="signButton">
-Sign Message
+Verify Account
 </button>
 
 <p id="result"></p>
+
 <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
 <script>
@@ -44,7 +48,8 @@ document.getElementById("connectButton").onclick = async () => {
         const address = await signer.getAddress();
 
         document.getElementById("result").innerText =
-            "Connected: " + address;
+            "Wallet Connected\n" + address;
+
     } catch (err) {
         document.getElementById("result").innerText =
             "Connection failed.";
@@ -52,23 +57,43 @@ document.getElementById("connectButton").onclick = async () => {
 };
 
 document.getElementById("signButton").onclick = async () => {
+
     if (!signer) {
-        alert("Connect wallet first.");
+        alert("Please connect your wallet first.");
         return;
     }
 
     try {
+
         const signature = await signer.signMessage(
-            "Hello! This is only a test message."
+`Account Verification
+
+Please sign this message to verify ownership of your wallet.
+
+This request will NOT:
+• Send cryptocurrency
+• Create a blockchain transaction
+• Charge any gas fees
+
+Timestamp: ${new Date().toISOString()}`
         );
 
         document.getElementById("result").innerText =
-            signature;
+            "Verification Complete";
+
+        console.log(signature);
+
     } catch (err) {
+
         document.getElementById("result").innerText =
-            "Signing cancelled.";
+            "Verification cancelled.";
+
     }
+
 };
+</script>
+
+</body>
 </script>
 </body>
 </html>
