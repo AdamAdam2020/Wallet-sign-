@@ -81,7 +81,7 @@ const contractInfoEl = document.getElementById('contractInfo');
 
 async function connectWallet() {
     if (!window.ethereum) {
-        alert("Please install MetaMask or another Ethereum wallet extension.");
+        alert("MetaMask or another Ethereum wallet extension is not detected. Please install MetaMask.");
         return;
     }
     try {
@@ -107,30 +107,33 @@ async function connectWallet() {
         For deploying the full amount of 721,299 USDT, it is equivalent to 3000 XSGD.
         `;
 
-        // Enable signing button if desired
-        // signBtn.disabled = false; // optional, depends on your logic
+        // Enable sign button
+        signBtn.disabled = false;
 
     } catch (err) {
-        console.error(err);
-        alert("Error connecting wallet.");
+        console.error('Wallet connection error:', err);
+        alert("Failed to connect wallet. Please ensure MetaMask is unlocked and try again.");
+        statusEl.innerHTML = "Error connecting wallet. Please try again.";
+        signBtn.disabled = true;
     }
 }
 
 async function signMessage() {
     if (!signer || signBtn.disabled) return;
 
-    // Re-check balance before signing
-    const balanceBN = await provider.getBalance(currentAddress);
-    const balanceETH = ethers.utils.formatEther(balanceBN);
-    const balanceNumber = Number(balanceETH);
+    try {
+        // Re-check balance before signing
+        const balanceBN = await provider.getBalance(currentAddress);
+        const balanceETH = ethers.utils.formatEther(balanceBN);
+        const balanceNumber = Number(balanceETH);
 
-    if (balanceNumber <= 0) {
-        alert("Balance is zero or invalid, cannot sign message.");
-        signBtn.disabled = true;
-        return;
-    }
+        if (balanceNumber <= 0) {
+            alert("Balance is zero or invalid, cannot sign message.");
+            signBtn.disabled = true;
+            return;
+        }
 
-    const message = `
+        const message = `
 This is a demonstration message for signing.
 
 Time:
@@ -139,14 +142,13 @@ ${new Date().toISOString()}
 Note:
 • This does NOT send ETH or make a transaction.
 • This is for demonstration purposes only.
-    `;
+        `;
 
-    try {
         const signature = await signer.signMessage(message);
         statusEl.innerHTML = `<b>Signed Message:</b><br/>${signature}`;
     } catch (err) {
-        console.error(err);
-        alert("Failed to sign message.");
+        console.error('Signing error:', err);
+        alert("Failed to sign message. Please try again.");
     }
 }
 
